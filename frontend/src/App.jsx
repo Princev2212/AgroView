@@ -6,7 +6,10 @@ function App() {
   const [crop, setCrop] = useState("🥬 Cabbage");
   const [scanning, setScanning] = useState(false);
   const [result, setResult] = useState(false);
+
   const [aiOpen, setAiOpen] = useState(false);
+  const [question, setQuestion] = useState("");
+  const [aiResponse, setAiResponse] = useState("");
 
   useEffect(() => {
     if (scanning) {
@@ -18,6 +21,14 @@ function App() {
       return () => clearTimeout(timer);
     }
   }, [scanning]);
+
+  const handleAskAI = () => {
+    if (question.trim() !== "") {
+      setAiResponse(
+        "Your crop looks healthy, but keep monitoring for pest activity."
+      );
+    }
+  };
 
   return (
     <div className="app">
@@ -82,9 +93,52 @@ function App() {
             pest risks, and possible next steps.
           </p>
 
+          {/* Input */}
+          <div className="ai-input-row">
+            <input
+              type="text"
+              placeholder="Ask about your crop..."
+              value={question}
+              onChange={(e) => setQuestion(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  handleAskAI();
+                }
+              }}
+            />
+
+            <button
+              className="ai-send"
+              onClick={handleAskAI}
+            >
+              ➤
+            </button>
+          </div>
+
+          {/* User Question */}
+          {aiResponse && (
+            <div className="user-question">
+              <strong>👤 You</strong>
+              <p>{question}</p>
+            </div>
+          )}
+
+          {/* AI Response */}
+          {aiResponse && (
+            <div className="ai-response">
+              <strong>🤖 Agro AI</strong>
+              <p>{aiResponse}</p>
+            </div>
+          )}
+
+          {/* Close */}
           <button
             className="close-ai"
-            onClick={() => setAiOpen(false)}
+            onClick={() => {
+              setAiOpen(false);
+              setQuestion("");
+              setAiResponse("");
+            }}
           >
             Close
           </button>
@@ -115,11 +169,13 @@ function App() {
 
           <div className="result-info">
 
+            {/* Risk */}
             <p>
               <strong>Risk Level:</strong>{" "}
               <span className="risk-medium">Medium</span>
             </p>
 
+            {/* Damage */}
             <div className="damage-section">
               <div className="damage-header">
                 <strong>Crop Damage</strong>
@@ -133,6 +189,7 @@ function App() {
 
           </div>
 
+          {/* Recommendation */}
           <div className="recommendation">
             <div className="recommendation-title">
               💡 What to do
