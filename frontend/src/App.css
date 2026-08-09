@@ -389,3 +389,138 @@ div {
   font-size: 14px;
   line-height: 1.5;
 }
+.ai-assistant {
+  margin-top: 18px;
+  padding: 22px;
+  background: linear-gradient(145deg, #ffffff, #f4f9f1);
+  border: 1px solid #dcebd5;
+  border-radius: 22px;
+  box-shadow: 0 10px 30px rgba(53, 91, 45, 0.12);
+}
+
+.ai-assistant h2 {
+  margin: 0 0 8px;
+  color: #315b2c;
+  font-size: 21px;
+  font-weight: 700;
+}
+
+.ai-message {
+  margin: 14px 0;
+  padding: 14px 16px;
+  background: #eef7ea;
+  border-radius: 15px;
+  color: #3f573b;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* Quick option buttons */
+
+.ai-options {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 9px;
+  margin: 15px 0;
+}
+
+.ai-options button {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #d6e6cf;
+  border-radius: 12px;
+  background: white;
+  color: #3f6238;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ai-options button:hover {
+  background: #edf7e9;
+  border-color: #8eb47f;
+  transform: translateY(-1px);
+}
+
+/* Input + send */
+
+.ai-input-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 15px;
+}
+
+.ai-input-row input {
+  flex: 1;
+  min-width: 0;
+  padding: 12px 14px;
+  border: 1px solid #d2dfcc;
+  border-radius: 12px;
+  outline: none;
+  background: white;
+  font-size: 14px;
+  color: #333;
+}
+
+.ai-input-row input:focus {
+  border-color: #79a96c;
+  box-shadow: 0 0 0 3px rgba(121, 169, 108, 0.12);
+}
+
+.ai-send {
+  width: 45px;
+  border: none;
+  border-radius: 12px;
+  background: #5f914f;
+  color: white;
+  font-size: 19px;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.ai-send:hover {
+  background: #4f7e42;
+  transform: translateY(-1px);
+}
+
+/* Chat */
+
+.ai-chat {
+  margin-top: 18px;
+  padding: 15px;
+  background: white;
+  border: 1px solid #e0eadc;
+  border-radius: 16px;
+}
+
+.ai-chat p {
+  margin: 6px 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #4b5548;
+}
+
+.ai-chat strong {
+  color: #315b2c;
+}
+
+/* Close button */
+
+.close-btn {
+  width: 100%;
+  margin-top: 16px;
+  padding: 11px;
+  border: none;
+  border-radius: 12px;
+  background: #edf3ea;
+  color: #4d7045;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.close-btn:hover {
+  background: #e1ecdd;
+}

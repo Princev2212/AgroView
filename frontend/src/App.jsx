@@ -23,33 +23,83 @@ function App() {
     }
   }, [scanning]);
 
+  /* =========================
+     MAIN AI QUESTION HANDLER
+     ========================= */
+
   const handleAskAI = () => {
-    if (question.trim() !== "") {
-      setAiResponse(
-        "Your crop looks healthy, but keep monitoring for pest activity."
-      );
+    const userQuestion = question.trim().toLowerCase();
+
+    if (userQuestion === "") {
+      return;
     }
+
+    let response = "";
+
+    if (
+      userQuestion.includes("pest") ||
+      userQuestion.includes("insect") ||
+      userQuestion.includes("bug")
+    ) {
+      response =
+        "🐞 Pest activity may be present. Check the leaves carefully and monitor affected areas regularly.";
+    } else if (
+      userQuestion.includes("damage") ||
+      userQuestion.includes("leaf") ||
+      userQuestion.includes("leaves")
+    ) {
+      response =
+        "📊 Some leaf damage can occur due to pest activity. Keep monitoring the affected leaves and check whether the damage is increasing.";
+    } else if (
+      userQuestion.includes("healthy") ||
+      userQuestion.includes("health")
+    ) {
+      response =
+        "🌱 Your crop currently looks healthy based on the available scan information. Continue regular monitoring.";
+    } else if (
+      userQuestion.includes("water") ||
+      userQuestion.includes("watering") ||
+      userQuestion.includes("irrigation")
+    ) {
+      response =
+        "💧 Check the soil moisture before watering. Avoid unnecessary watering and monitor your crop regularly.";
+    } else if (
+      userQuestion.includes("aphid") ||
+      userQuestion.includes("aphids")
+    ) {
+      response =
+        "🐞 Aphids can damage young leaves and plant growth. Check the underside of leaves regularly and monitor the affected areas.";
+    } else {
+      response =
+        "🤖 I can help with crop health, pests, leaf damage, and watering advice. Try asking about any of these topics.";
+    }
+
+    setAiResponse(response);
   };
+
+  /* =========================
+     QUICK AI OPTIONS
+     ========================= */
 
   const handleAIOption = (type) => {
     if (type === "pest") {
       setQuestion("🐛 Pest Problem");
       setAiResponse(
-        "Please scan your crop leaf. AgroView will help identify possible pests and explain the risk level."
+        "🐞 Pest activity may be present. Please scan your crop leaf so AgroView can help identify possible pests and explain the risk level."
       );
     }
 
     if (type === "health") {
       setQuestion("🌿 Crop Health");
       setAiResponse(
-        "Your crop health can be checked using a leaf scan. AgroView will analyze the crop and show its health status."
+        "🌱 Your crop health can be checked using a leaf scan. AgroView will analyze the crop and show its health status."
       );
     }
 
     if (type === "water") {
       setQuestion("💧 Water Advice");
       setAiResponse(
-        "Check the soil moisture before watering. Avoid unnecessary watering and monitor your crop regularly."
+        "💧 Check the soil moisture before watering. Avoid unnecessary watering and monitor your crop regularly."
       );
     }
   };
@@ -57,7 +107,10 @@ function App() {
   return (
     <div className="app">
 
-      {/* Header */}
+      {/* =========================
+          HEADER
+          ========================= */}
+
       <header className="app-header">
         <h1>🌱 AgroView</h1>
 
@@ -67,19 +120,28 @@ function App() {
         </div>
       </header>
 
-      {/* Intro */}
+      {/* =========================
+          INTRO
+          ========================= */}
+
       <div className="intro-card">
         <h2>Smart Farming Assistant</h2>
         <p>AI Powered Crop Monitoring System</p>
       </div>
 
-      {/* Selected Crop */}
+      {/* =========================
+          SELECTED CROP
+          ========================= */}
+
       <div className="selected-crop">
         <span>Selected Crop</span>
         <h3>{crop}</h3>
       </div>
 
-      {/* Scan Button */}
+      {/* =========================
+          SCAN BUTTON
+          ========================= */}
+
       <Button
         text={scanning ? "🔄 Scanning..." : "📷 Scan Crop"}
         onClick={() => {
@@ -88,12 +150,17 @@ function App() {
         }}
       />
 
-      {/* Ask Agro AI */}
+      {/* =========================
+          ASK AGRO AI CARD
+          ========================= */}
+
       <div className="ai-card">
+
         <div className="ai-icon">🎤</div>
 
         <div className="ai-content">
           <h3>Ask Agro AI</h3>
+
           <p>
             Ask questions about your crop and get farming guidance.
           </p>
@@ -106,7 +173,10 @@ function App() {
           🎤 Ask Agro AI
         </button>
 
-        {/* AI Quick Assistant */}
+        {/* =========================
+            AI QUICK ASSISTANT
+            ========================= */}
+
         {showAssistant && (
           <div className="ai-assistant">
 
@@ -119,6 +189,7 @@ function App() {
             </div>
 
             {/* Quick Options */}
+
             <div className="ai-options">
 
               <button
@@ -141,7 +212,37 @@ function App() {
 
             </div>
 
-            {/* AI Question + Response */}
+            {/* =========================
+                AI QUESTION INPUT
+                ========================= */}
+
+            <div className="ai-input-row">
+
+              <input
+                type="text"
+                placeholder="Ask about your crop..."
+                value={question}
+                onChange={(e) => setQuestion(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    handleAskAI();
+                  }
+                }}
+              />
+
+              <button
+                className="ai-send"
+                onClick={handleAskAI}
+              >
+                ➤
+              </button>
+
+            </div>
+
+            {/* =========================
+                USER + AI CHAT
+                ========================= */}
+
             {aiResponse && (
               <div className="ai-chat">
 
@@ -161,6 +262,7 @@ function App() {
             )}
 
             {/* Close Assistant */}
+
             <button
               className="close-btn"
               onClick={() => {
@@ -176,7 +278,10 @@ function App() {
         )}
       </div>
 
-      {/* Agro AI Panel */}
+      {/* =========================
+          OLD AGRO AI PANEL
+          ========================= */}
+
       {aiOpen && (
         <div className="ai-panel">
 
@@ -188,6 +293,7 @@ function App() {
           </p>
 
           {/* Input */}
+
           <div className="ai-input-row">
 
             <input
@@ -212,22 +318,31 @@ function App() {
           </div>
 
           {/* User Question */}
+
           {aiResponse && (
             <div className="user-question">
+
               <strong>👤 You</strong>
+
               <p>{question}</p>
+
             </div>
           )}
 
           {/* AI Response */}
+
           {aiResponse && (
             <div className="ai-response">
+
               <strong>🤖 Agro AI</strong>
+
               <p>{aiResponse}</p>
+
             </div>
           )}
 
           {/* Close */}
+
           <button
             className="close-ai"
             onClick={() => {
@@ -242,7 +357,10 @@ function App() {
         </div>
       )}
 
-      {/* Scanning Card */}
+      {/* =========================
+          SCANNING CARD
+          ========================= */}
+
       {scanning && (
         <div className="scanning-card">
 
@@ -259,7 +377,10 @@ function App() {
         </div>
       )}
 
-      {/* Scan Result */}
+      {/* =========================
+          SCAN RESULT
+          ========================= */}
+
       {result && (
         <div className="result-card">
 
@@ -272,6 +393,7 @@ function App() {
           <div className="result-info">
 
             {/* Risk */}
+
             <p>
               <strong>Risk Level:</strong>{" "}
               <span className="risk-medium">
@@ -280,6 +402,7 @@ function App() {
             </p>
 
             {/* Damage */}
+
             <div className="damage-section">
 
               <div className="damage-header">
@@ -296,6 +419,7 @@ function App() {
           </div>
 
           {/* Recommendation */}
+
           <div className="recommendation">
 
             <div className="recommendation-title">
@@ -312,7 +436,10 @@ function App() {
         </div>
       )}
 
-      {/* Crop Buttons */}
+      {/* =========================
+          CROP BUTTONS
+          ========================= */}
+
       <div className="crop-buttons">
 
         <button
