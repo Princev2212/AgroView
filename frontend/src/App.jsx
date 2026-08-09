@@ -11,6 +11,7 @@ function App() {
   const [question, setQuestion] = useState("");
   const [aiResponse, setAiResponse] = useState("");
   const [showAssistant, setShowAssistant] = useState(false);
+  const [listening, setListening] = useState(false);
 
   useEffect(() => {
     if (scanning) {
@@ -27,55 +28,123 @@ function App() {
      MAIN AI QUESTION HANDLER
      ========================= */
 
-  const handleAskAI = () => {
-    const userQuestion = question.trim().toLowerCase();
+  const handleAskAI = (inputQuestion = question) => {
+  const userQuestion = inputQuestion.trim().toLowerCase();
 
-    if (userQuestion === "") {
+  if (userQuestion === "") {
+    return;
+  }
+
+  let response = "";
+
+  if (
+    userQuestion.includes("pest") ||
+    userQuestion.includes("insect") ||
+    userQuestion.includes("bug")
+  ) {
+    if (crop === "🥬 Cabbage") {
+      response =
+        "🐞 Cabbage leaves may be affected by pests such as aphids. Check the underside of the leaves regularly and monitor the affected areas.";
+    } else if (crop === "🌾 Rice") {
+      response =
+        "🐞 Rice crops can be affected by different pests. Monitor the leaves and stems regularly for unusual spots or insect activity.";
+    } else if (crop === "🍅 Tomato") {
+      response =
+        "🐞 Tomato plants can experience pest activity around leaves and young shoots. Check these areas regularly.";
+    } else {
+      response =
+        "🐞 Cauliflower leaves can attract pests. Check the underside of leaves and monitor for holes or unusual damage.";
+    }
+  } else if (
+    userQuestion.includes("damage") ||
+    userQuestion.includes("leaf") ||
+    userQuestion.includes("leaves")
+  ) {
+    response =
+      `📊 For ${crop}, monitor damaged leaves regularly. If the damaged area keeps increasing, perform another crop scan.`;
+  } else if (
+    userQuestion.includes("healthy") ||
+    userQuestion.includes("health")
+  ) {
+    response =
+      `🌱 Your selected crop is ${crop}. Continue regular monitoring and use the crop scan to check its health condition.`;
+  } else if (
+    userQuestion.includes("water") ||
+    userQuestion.includes("watering") ||
+    userQuestion.includes("irrigation")
+  ) {
+    response =
+      `💧 For ${crop}, check the soil moisture before watering. Avoid unnecessary watering and maintain regular monitoring.`;
+  } else if (
+    userQuestion.includes("aphid") ||
+    userQuestion.includes("aphids")
+  ) {
+    response =
+      `🐞 Aphids can affect ${crop}. Check the underside of leaves and young plant parts regularly for signs of pest activity.`;
+  } else {
+    response =
+      `🤖 I can help you with ${crop} crop health, pests, leaf damage, and watering advice.`;
+  }
+
+  setAiResponse(response);
+  speakAIResponse(response);
+};
+const handleVoiceInput = () => {
+  const SpeechRecognition =
+    window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  if (!SpeechRecognition) {
+    alert("Voice input is not supported. Please use Chrome or Edge.");
+    return;
+  }
+
+  const recognition = new SpeechRecognition();
+
+  recognition.lang = "en-IN";
+  recognition.continuous = false;
+  recognition.interimResults = false;
+  recognition.maxAlternatives = 1;
+
+  recognition.onstart = () => {
+    setListening(true);
+  };
+
+  recognition.onresult = (event) => {
+  const voiceText = event.results[0][0].transcript;
+
+  setQuestion(voiceText);
+  setListening(false);
+
+  handleAskAI(voiceText);
+};
+
+  recognition.onerror = (event) => {
+    console.log("Voice error:", event.error);
+    setListening(false);
+  };
+
+  recognition.onend = () => {
+    setListening(false);
+  };
+
+  recognition.start();
+};
+const speakAIResponse = (text) => {
+    if (!("speechSynthesis" in window)) {
+      alert("Voice output is not supported in this browser.");
       return;
     }
 
-    let response = "";
+    window.speechSynthesis.cancel();
 
-    if (
-      userQuestion.includes("pest") ||
-      userQuestion.includes("insect") ||
-      userQuestion.includes("bug")
-    ) {
-      response =
-        "🐞 Pest activity may be present. Check the leaves carefully and monitor affected areas regularly.";
-    } else if (
-      userQuestion.includes("damage") ||
-      userQuestion.includes("leaf") ||
-      userQuestion.includes("leaves")
-    ) {
-      response =
-        "📊 Some leaf damage can occur due to pest activity. Keep monitoring the affected leaves and check whether the damage is increasing.";
-    } else if (
-      userQuestion.includes("healthy") ||
-      userQuestion.includes("health")
-    ) {
-      response =
-        "🌱 Your crop currently looks healthy based on the available scan information. Continue regular monitoring.";
-    } else if (
-      userQuestion.includes("water") ||
-      userQuestion.includes("watering") ||
-      userQuestion.includes("irrigation")
-    ) {
-      response =
-        "💧 Check the soil moisture before watering. Avoid unnecessary watering and monitor your crop regularly.";
-    } else if (
-      userQuestion.includes("aphid") ||
-      userQuestion.includes("aphids")
-    ) {
-      response =
-        "🐞 Aphids can damage young leaves and plant growth. Check the underside of leaves regularly and monitor the affected areas.";
-    } else {
-      response =
-        "🤖 I can help with crop health, pests, leaf damage, and watering advice. Try asking about any of these topics.";
-    }
+   const speech = new SpeechSynthesisUtterance(text);
 
-    setAiResponse(response);
-  };
+   speech.lang = "en-IN";
+   speech.rate = 0.9;
+   speech.pitch = 1;
+
+   window.speechSynthesis.speak(speech);
+};
 
   /* =========================
      QUICK AI OPTIONS
@@ -216,7 +285,13 @@ function App() {
                 AI QUESTION INPUT
                 ========================= */}
 
-            <div className="ai-input-row">
+            <div className="ai-input-row"> 
+              <button
+                className={`ai-mic ${listening ? "listening" : ""}`}
+                onClick={handleVoiceInput}
+              >
+                {listening ? "🔴" : "🎤"}
+               </button>
 
               <input
                 type="text"
@@ -434,12 +509,7 @@ function App() {
           </div>
 
         </div>
-      )}
-
-      {/* =========================
-          CROP BUTTONS
-          ========================= */}
-
+      )} 
       <div className="crop-buttons">
 
         <button
