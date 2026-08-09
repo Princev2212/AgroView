@@ -10,6 +10,7 @@ function App() {
   const [aiOpen, setAiOpen] = useState(false);
   const [question, setQuestion] = useState("");
   const [aiResponse, setAiResponse] = useState("");
+  const [showAssistant, setShowAssistant] = useState(false);
 
   useEffect(() => {
     if (scanning) {
@@ -26,6 +27,29 @@ function App() {
     if (question.trim() !== "") {
       setAiResponse(
         "Your crop looks healthy, but keep monitoring for pest activity."
+      );
+    }
+  };
+
+  const handleAIOption = (type) => {
+    if (type === "pest") {
+      setQuestion("🐛 Pest Problem");
+      setAiResponse(
+        "Please scan your crop leaf. AgroView will help identify possible pests and explain the risk level."
+      );
+    }
+
+    if (type === "health") {
+      setQuestion("🌿 Crop Health");
+      setAiResponse(
+        "Your crop health can be checked using a leaf scan. AgroView will analyze the crop and show its health status."
+      );
+    }
+
+    if (type === "water") {
+      setQuestion("💧 Water Advice");
+      setAiResponse(
+        "Check the soil moisture before watering. Avoid unnecessary watering and monitor your crop regularly."
       );
     }
   };
@@ -77,15 +101,85 @@ function App() {
 
         <button
           className="ai-button"
-          onClick={() => setAiOpen(true)}
+          onClick={() => setShowAssistant(true)}
         >
-          Ask
+          🎤 Ask Agro AI
         </button>
+
+        {/* AI Quick Assistant */}
+        {showAssistant && (
+          <div className="ai-assistant">
+
+            <h2>🤖 Agro AI Assistant</h2>
+
+            <div className="ai-message">
+              👋 Hello! I am Agro AI.
+              <br />
+              How can I help you with your crop?
+            </div>
+
+            {/* Quick Options */}
+            <div className="ai-options">
+
+              <button
+                onClick={() => handleAIOption("pest")}
+              >
+                🐛 Pest Problem
+              </button>
+
+              <button
+                onClick={() => handleAIOption("health")}
+              >
+                🌿 Crop Health
+              </button>
+
+              <button
+                onClick={() => handleAIOption("water")}
+              >
+                💧 Water Advice
+              </button>
+
+            </div>
+
+            {/* AI Question + Response */}
+            {aiResponse && (
+              <div className="ai-chat">
+
+                <p>
+                  <strong>👤 You:</strong>
+                </p>
+
+                <p>{question}</p>
+
+                <p>
+                  <strong>🤖 Agro AI:</strong>
+                </p>
+
+                <p>{aiResponse}</p>
+
+              </div>
+            )}
+
+            {/* Close Assistant */}
+            <button
+              className="close-btn"
+              onClick={() => {
+                setShowAssistant(false);
+                setQuestion("");
+                setAiResponse("");
+              }}
+            >
+              Close
+            </button>
+
+          </div>
+        )}
       </div>
 
       {/* Agro AI Panel */}
       {aiOpen && (
         <div className="ai-panel">
+
           <h3>🎤 Agro AI</h3>
 
           <p>
@@ -95,6 +189,7 @@ function App() {
 
           {/* Input */}
           <div className="ai-input-row">
+
             <input
               type="text"
               placeholder="Ask about your crop..."
@@ -113,6 +208,7 @@ function App() {
             >
               ➤
             </button>
+
           </div>
 
           {/* User Question */}
@@ -142,12 +238,14 @@ function App() {
           >
             Close
           </button>
+
         </div>
       )}
 
       {/* Scanning Card */}
       {scanning && (
         <div className="scanning-card">
+
           <div className="scan-icon">📷</div>
 
           <h3>Scanning {crop}</h3>
@@ -157,13 +255,17 @@ function App() {
           </p>
 
           <div className="scan-loader"></div>
+
         </div>
       )}
 
       {/* Scan Result */}
       {result && (
         <div className="result-card">
-          <span className="result-label">🧪 Scan Result</span>
+
+          <span className="result-label">
+            🧪 Scan Result
+          </span>
 
           <h3>🐞 Aphid Detected</h3>
 
@@ -172,11 +274,14 @@ function App() {
             {/* Risk */}
             <p>
               <strong>Risk Level:</strong>{" "}
-              <span className="risk-medium">Medium</span>
+              <span className="risk-medium">
+                Medium
+              </span>
             </p>
 
             {/* Damage */}
             <div className="damage-section">
+
               <div className="damage-header">
                 <strong>Crop Damage</strong>
                 <span>12%</span>
@@ -185,21 +290,25 @@ function App() {
               <div className="damage-bar">
                 <div className="damage-fill"></div>
               </div>
+
             </div>
 
           </div>
 
           {/* Recommendation */}
           <div className="recommendation">
+
             <div className="recommendation-title">
               💡 What to do
             </div>
 
             <p>
-              Monitor the affected leaves regularly and take suitable
-              crop-protection measures.
+              Monitor the affected leaves regularly and take
+              suitable crop-protection measures.
             </p>
+
           </div>
+
         </div>
       )}
 
@@ -207,7 +316,11 @@ function App() {
       <div className="crop-buttons">
 
         <button
-          className={crop === "🥬 Cabbage" ? "active-crop" : ""}
+          className={
+            crop === "🥬 Cabbage"
+              ? "active-crop"
+              : ""
+          }
           onClick={() => {
             setCrop("🥬 Cabbage");
             setScanning(false);
@@ -218,7 +331,11 @@ function App() {
         </button>
 
         <button
-          className={crop === "🌾 Rice" ? "active-crop" : ""}
+          className={
+            crop === "🌾 Rice"
+              ? "active-crop"
+              : ""
+          }
           onClick={() => {
             setCrop("🌾 Rice");
             setScanning(false);
@@ -229,7 +346,11 @@ function App() {
         </button>
 
         <button
-          className={crop === "🍅 Tomato" ? "active-crop" : ""}
+          className={
+            crop === "🍅 Tomato"
+              ? "active-crop"
+              : ""
+          }
           onClick={() => {
             setCrop("🍅 Tomato");
             setScanning(false);
@@ -240,7 +361,11 @@ function App() {
         </button>
 
         <button
-          className={crop === "🥦 Cauliflower" ? "active-crop" : ""}
+          className={
+            crop === "🥦 Cauliflower"
+              ? "active-crop"
+              : ""
+          }
           onClick={() => {
             setCrop("🥦 Cauliflower");
             setScanning(false);
