@@ -600,3 +600,43 @@ div {
   color: #3f513b;
   font-size: 14px;
 }
+.risk-low {
+  color: #3f7d35;
+  background: #e8f5e4;
+  padding: 4px 9px;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+.risk-medium {
+  color: #9a7200;
+  background: #fff4cc;
+  padding: 4px 9px;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+.risk-high {
+  color: #b33a32;
+  background: #fde8e6;
+  padding: 4px 9px;
+  border-radius: 8px;
+  font-weight: 600;
+}
+.damage-fill {
+  height: 100%;
+  border-radius: 10px;
+  transition: width 0.5s ease;
+}
+
+.damage-low {
+  background: #72a866;
+}
+
+.damage-medium {
+  background: #d5a936;
+}
+
+.damage-high {
+  background: #d65c52;
+}

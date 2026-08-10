@@ -6,6 +6,10 @@ function App() {
   const [crop, setCrop] = useState("🥬 Cabbage");
   const [scanning, setScanning] = useState(false);
   const [result, setResult] = useState(false);
+  const [pestName, setPestName] = useState("");
+  const [riskLevel, setRiskLevel] = useState("");
+  const [damage, setDamage] = useState(0);
+  const [recommendation, setRecommendation] = useState("");
 
   const [question, setQuestion] = useState("");
   const [aiResponse, setAiResponse] = useState("");
@@ -210,10 +214,40 @@ const speakAIResponse = (text) => {
 
       <Button
         text={scanning ? "🔄 Scanning..." : "📷 Scan Crop"}
-        onClick={() => {
-          setScanning(true);
-          setResult(false);
-        }}
+       onClick={() => {
+         setScanning(true);
+         setResult(false);
+
+         if (crop === "🥬 Cabbage") {
+           setPestName("Aphid");
+           setRiskLevel("Medium");
+           setDamage(12);
+           setRecommendation(
+             "Monitor the affected leaves regularly and check for increasing pest activity."
+           );
+         } else if (crop === "🌾 Rice") {
+           setPestName("Stem Borer");
+           setRiskLevel("High");
+           setDamage(18);
+           setRecommendation(
+             "High risk detected. Check the affected plants carefully and take suitable crop-protection measures."
+            );
+         } else if (crop === "🍅 Tomato") {
+           setPestName("Whitefly");
+           setRiskLevel("Medium");
+           setDamage(10);
+           setRecommendation(
+             "Monitor the leaves and young shoots regularly for further pest activity."
+            );
+         } else {
+           setPestName("Caterpillar");
+           setRiskLevel("Low");
+           setDamage(7);
+           setRecommendation(
+             "Damage is currently low. Continue regular monitoring of the leaves."
+            );
+         }
+     }}
       />
 
       <div className="ai-card">
@@ -360,14 +394,14 @@ const speakAIResponse = (text) => {
             🧪 Scan Result
           </span>
 
-          <h3>🐞 Aphid Detected</h3>
+          <h3>🐞 {pestName} Detected</h3>
 
           <div className="result-info">
 
             <p>
               <strong>Risk Level:</strong>{" "}
-              <span className="risk-medium">
-                Medium
+              <span className={`risk-${riskLevel.toLowerCase()}`}>
+                {riskLevel}
               </span>
             </p>
 
@@ -375,11 +409,20 @@ const speakAIResponse = (text) => {
 
               <div className="damage-header">
                 <strong>Crop Damage</strong>
-                <span>12%</span>
+                <span>{damage}%</span>
               </div>
 
               <div className="damage-bar">
-                <div className="damage-fill"></div>
+                <div
+                  className={`damage-fill ${
+                    damage < 10
+                      ? "damage-low"
+                      : damage < 20
+                      ? "damage-medium"
+                      : "damage-high"
+                 }`}
+                 style={{ width: `${damage}%` }}
+                ></div>
               </div>
 
             </div>
@@ -392,10 +435,7 @@ const speakAIResponse = (text) => {
               💡 What to do
             </div>
 
-            <p>
-              Monitor the affected leaves regularly and take
-              suitable crop-protection measures.
-            </p>
+            <p>{recommendation}</p>
 
           </div>
 
