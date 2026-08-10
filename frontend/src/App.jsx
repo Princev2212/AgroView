@@ -11,6 +11,7 @@ function App() {
   const [aiResponse, setAiResponse] = useState("");
   const [showAssistant, setShowAssistant] = useState(false);
   const [listening, setListening] = useState(false);
+  const [recognition, setRecognition] = useState(null);
 
   useEffect(() => {
     if (!scanning) return;
@@ -23,17 +24,33 @@ function App() {
     return () => clearTimeout(timer);
   }, [scanning]);
 
-  const speakAIResponse = (text) => {
-    if (!("speechSynthesis" in window)) return;
+const speakAIResponse = (text) => {
+  if (!("speechSynthesis" in window)) return;
 
+  window.speechSynthesis.cancel();
+
+  const cleanText = text
+    .replace(/\p{Extended_Pictographic}/gu, "")
+    .replace(/\uFE0F/g, "")
+    .trim();
+
+  const speech = new SpeechSynthesisUtterance(cleanText);
+
+  speech.lang = "en-IN";
+  speech.rate = 0.9;
+  speech.pitch = 1;
+
+  window.speechSynthesis.speak(speech);
+};
+  const stopAIResponse = () => {
     window.speechSynthesis.cancel();
-
-    const speech = new SpeechSynthesisUtterance(text);
-    speech.lang = "en-IN";
-    speech.rate = 0.9;
-    speech.pitch = 1;
-
-    window.speechSynthesis.speak(speech);
+  };
+  const stopListening = () => {
+    if (recognition) {
+      recognition.stop();
+      setRecognition(null);
+      setListening(false);
+    }
   };
 
   const handleAskAI = (input = question) => {
@@ -102,17 +119,18 @@ function App() {
       return;
     }
 
-    const recognition = new SpeechRecognition();
+    const newRecognition = new SpeechRecognition();
+    setRecognition(newRecognition);
 
-    recognition.lang = "en-IN";
-    recognition.continuous = false;
-    recognition.interimResults = false;
+    newRecognition.lang = "en-IN";
+    newRecognition.continuous = false;
+    newRecognition.interimResults = false;
 
-    recognition.onstart = () => {
+    newRecognition.onstart = () => {
       setListening(true);
     };
 
-    recognition.onresult = (event) => {
+    newRecognition.onresult = (event) => {
       const text = event.results[0][0].transcript;
 
       setQuestion(text);
@@ -121,39 +139,44 @@ function App() {
       handleAskAI(text);
     };
 
-    recognition.onerror = () => {
+    newRecognition.onerror = () => {
       setListening(false);
     };
 
-    recognition.onend = () => {
+    newRecognition.onend = () => {
       setListening(false);
     };
 
-    recognition.start();
+    newRecognition.start();
   };
 
-  const handleAIOption = (type) => {
-    if (type === "pest") {
-      setQuestion("Pest Problem");
-      setAiResponse(
-        "🐞 Pest activity may be present. Scan your crop leaf to check for possible pest infestation."
-      );
-    }
+ const handleAIOption = (type) => {
+  let answer = "";
 
-    if (type === "health") {
-      setQuestion("Crop Health");
-      setAiResponse(
-        "🌱 You can check your crop health using the leaf scan. AgroView will show the health condition."
-      );
-    }
+  if (type === "pest") {
+    setQuestion("Pest Problem");
 
-    if (type === "water") {
-      setQuestion("Water Advice");
-      setAiResponse(
-        "💧 Check the soil moisture before watering. Avoid unnecessary watering and monitor the crop regularly."
-      );
-    }
-  };
+    answer =
+      "🐞 Pest activity may be present. Scan your crop leaf to check for possible pest infestation.";
+  }
+
+  if (type === "health") {
+    setQuestion("Crop Health");
+
+    answer =
+      "🌱 You can check your crop health using the leaf scan. AgroView will show the health condition.";
+  }
+
+  if (type === "water") {
+    setQuestion("Water Advice");
+
+    answer =
+      "💧 Check the soil moisture before watering. Avoid unnecessary watering and monitor the crop regularly.";
+  }
+
+  setAiResponse(answer);
+  speakAIResponse(answer);
+};
 
   const changeCrop = (newCrop) => {
     setCrop(newCrop);
@@ -279,7 +302,20 @@ function App() {
                   <strong>🤖 Agro AI:</strong>
                 </p>
 
-                <p>{aiResponse}</p>
+                <div className="ai-response-box">
+                  <span>🤖</span>
+                  <p>{aiResponse}</p>
+                </div>
+
+                <div className="ai-voice-controls">
+                  <button onClick={() => speakAIResponse(aiResponse)}>
+                    🔊 Speak
+                  </button>
+
+                  <button onClick={stopAIResponse}>
+                    🔇 Stop
+                  </button>
+                 </div>
 
               </div>
             )}
@@ -287,9 +323,11 @@ function App() {
             <button
               className="close-btn"
               onClick={() => {
-                setShowAssistant(false);
-                setQuestion("");
-                setAiResponse("");
+                 stopAIResponse();
+                 stopListening();
+                 setShowAssistant(false);
+                 setQuestion("");
+                 setAiResponse("");
               }}
             >
               Close

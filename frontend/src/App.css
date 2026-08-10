@@ -559,3 +559,44 @@ div {
     transform: scale(1);
   }
 }
+.ai-voice-controls {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.ai-voice-controls button {
+  flex: 1;
+  padding: 9px;
+  border: none;
+  border-radius: 10px;
+  background: #edf7e9;
+  color: #315b2c;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.ai-voice-controls button:hover {
+  background: #dcefd5;
+}
+.ai-response-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 8px;
+  padding: 13px;
+  background: #f1f8ee;
+  border-radius: 14px;
+  border: 1px solid #dcebd6;
+}
+
+.ai-response-box span {
+  font-size: 20px;
+}
+
+.ai-response-box p {
+  margin: 0;
+  line-height: 1.5;
+  color: #3f513b;
+  font-size: 14px;
+}
