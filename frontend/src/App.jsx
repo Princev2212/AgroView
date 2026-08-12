@@ -6,10 +6,13 @@ function App() {
   const [crop, setCrop] = useState("🥬 Cabbage");
   const [scanning, setScanning] = useState(false);
   const [result, setResult] = useState(false);
+  const [history, setHistory] = useState([]);
   const [pestName, setPestName] = useState("");
   const [riskLevel, setRiskLevel] = useState("");
   const [damage, setDamage] = useState(0);
   const [recommendation, setRecommendation] = useState("");
+  const [showDetails, setShowDetails] = useState(false);
+  const [pestDetails, setPestDetails] = useState("");
 
   const [question, setQuestion] = useState("");
   const [aiResponse, setAiResponse] = useState("");
@@ -23,6 +26,23 @@ function App() {
     const timer = setTimeout(() => {
       setScanning(false);
       setResult(true);
+      setHistory((oldHistory) => [
+        ...oldHistory,
+        {
+          crop,
+          pest: pestName,
+          risk: riskLevel,
+          damage,
+          date: new Date().toLocaleString("en-IN", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: true
+         })
+        }
+      ]);
     }, 2000);
 
     return () => clearTimeout(timer);
@@ -217,6 +237,7 @@ const speakAIResponse = (text) => {
        onClick={() => {
          setScanning(true);
          setResult(false);
+         setShowDetails(false);
 
          if (crop === "🥬 Cabbage") {
            setPestName("Aphid");
@@ -225,12 +246,18 @@ const speakAIResponse = (text) => {
            setRecommendation(
              "Monitor the affected leaves regularly and check for increasing pest activity."
            );
+           setPestDetails(
+             "Aphids can affect young leaves and new plant growth. Check the underside of leaves regularly."
+           );
          } else if (crop === "🌾 Rice") {
            setPestName("Stem Borer");
            setRiskLevel("High");
            setDamage(18);
            setRecommendation(
              "High risk detected. Check the affected plants carefully and take suitable crop-protection measures."
+            );
+            setPestDetails(
+              "Stem borers can cause significant damage to rice plants. Regular monitoring and timely intervention are crucial."
             );
          } else if (crop === "🍅 Tomato") {
            setPestName("Whitefly");
@@ -239,12 +266,18 @@ const speakAIResponse = (text) => {
            setRecommendation(
              "Monitor the leaves and young shoots regularly for further pest activity."
             );
+           setPestDetails(
+             "Whiteflies can cause yellowing of leaves and stunt plant growth. Check the undersides of leaves for their presence."
+           );
          } else {
            setPestName("Caterpillar");
            setRiskLevel("Low");
            setDamage(7);
            setRecommendation(
              "Damage is currently low. Continue regular monitoring of the leaves."
+            );
+            setPestDetails(
+              "Caterpillars can cause damage to leaves and stems. Regular monitoring is recommended."
             );
          }
      }}
@@ -438,6 +471,18 @@ const speakAIResponse = (text) => {
             <p>{recommendation}</p>
 
           </div>
+          <button
+            className="details-button"
+            onClick={() => setShowDetails(!showDetails)}
+         >
+            {showDetails ? "Hide Details ↑" : "View Details →"}
+          </button>
+          {showDetails && (
+            <div className="details-section">
+              <h4>Details</h4>
+              <p>{pestDetails}</p>
+            </div>
+          )}
 
         </div>
       )}
@@ -474,9 +519,39 @@ const speakAIResponse = (text) => {
           🥦 Cauliflower
         </button>
 
-      </div>
+      </div> 
+      <div className="history-card">
+   <h3>📋 Scan History</h3>
+  <button
+  className="clear-history"
+  onClick={() => setHistory([])}
+>
+  🗑️ Clear History
+</button>
 
+  {history.length === 0 ? (
+   <div className="empty-history">
+     <div className="empty-history-icon">📋</div>
+       <strong>No scans yet</strong>
+       <p>Scan a crop to see your scan history here.</p>
+      </div>
+     ) : (
+     [...history].reverse().map((item, index) => (
+      <div className="history-item" key={index}>
+        <strong>{item.crop}</strong>
+        <p>🐞 {item.pest}</p>
+        <p>
+          Risk: {item.risk} | Damage: {item.damage}%
+        </p>
+
+        <p>🕒 Scanned: {item.date}</p>
     </div>
+  ))
+)}
+</div>
+
+</div>
+  
   );
 }
 

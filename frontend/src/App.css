@@ -640,3 +640,95 @@ div {
 .damage-high {
   background: #d65c52;
 }
+.details-button {
+  width: 100%;
+  margin-top: 12px;
+  padding: 10px;
+  border: none;
+  border-radius: 10px;
+  background: #edf7e9;
+  color: #315b2c;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.details-button:hover {
+  background: #dcefd5;
+}
+
+.details-panel {
+  margin-top: 12px;
+  padding: 14px;
+  border-radius: 12px;
+  background: #f8fbf6;
+  border: 1px solid #dcebd6;
+}
+
+.details-panel h4 {
+  margin: 0 0 10px;
+}
+
+.details-panel p {
+  margin: 7px 0;
+  line-height: 1.5;
+  font-size: 14px;
+}
+.history-card {
+  margin-top: 20px;
+  padding: 18px;
+  background: white;
+  border-radius: 16px;
+  border: 1px solid #dcebd6;
+}
+
+.history-card h3 {
+  margin-top: 0;
+  color: #315b2c;
+}
+
+.history-item {
+  padding: 12px;
+  margin-top: 10px;
+  background: #f5faf2;
+  border-radius: 10px;
+}
+
+.history-item p {
+  margin: 5px 0;
+  font-size: 14px;
+}
+.clear-history {
+  border: none;
+  padding: 8px 12px;
+  border-radius: 9px;
+  background: #fde8e6;
+  color: #a33a32;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 8px;
+}
+
+.clear-history:hover {
+  background: #f8d8d5;
+}
+.empty-history {
+  text-align: center;
+  padding: 20px 10px;
+  color: #667361;
+}
+
+.empty-history-icon {
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+
+.empty-history strong {
+  display: block;
+  color: #315b2c;
+  margin-bottom: 5px;
+}
+
+.empty-history p {
+  margin: 0;
+  font-size: 14px;
+}
