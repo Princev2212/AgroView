@@ -59,6 +59,7 @@ function App() {
             pest: pestName,
             risk: riskLevel,
             damage,
+            recommendation,
             date: new Date().toLocaleString("en-IN", {
               day: "2-digit",
               month: "short",
@@ -254,7 +255,7 @@ function App() {
 
       <div className="intro-card">
         <h2>Smart Farming Assistant</h2>
-        <p>AI Powered Crop Monitoring System</p>
+        <p>Crop Monitoring & Farming Guidance</p>
       </div>
 
       <div className="selected-crop">
@@ -274,7 +275,7 @@ function App() {
             setRiskLevel("Medium");
             setDamage(12);
             setRecommendation(
-              "Monitor the affected leaves regularly and check for increasing pest activity."
+              "Check the affected leaves regularly and monitor for any increase in pest activity."
             );
             setPestDetails(
               "Aphids can affect young leaves and new plant growth. Check the underside of leaves regularly."
@@ -284,7 +285,7 @@ function App() {
             setRiskLevel("High");
             setDamage(18);
             setRecommendation(
-              "High risk detected. Check the affected plants carefully and take suitable crop-protection measures."
+              "Check the affected plants carefully and take suitable crop-protection measures."
             );
             setPestDetails(
               "Stem borers can cause significant damage to rice plants. Regular monitoring and timely intervention are crucial."
@@ -294,7 +295,7 @@ function App() {
             setRiskLevel("Medium");
             setDamage(10);
             setRecommendation(
-              "Monitor the leaves and young shoots regularly for further pest activity."
+              "Check the leaves and young shoots regularly for further pest activity."
             );
             setPestDetails(
               "Whiteflies can cause yellowing of leaves and stunt plant growth. Check the undersides of leaves for their presence."
@@ -304,7 +305,7 @@ function App() {
             setRiskLevel("Low");
             setDamage(7);
             setRecommendation(
-              "Damage is currently low. Continue regular monitoring of the leaves."
+              "Damage is currently low. Continue checking the leaves regularly."
             );
             setPestDetails(
               "Caterpillars can cause damage to leaves and stems. Regular monitoring is recommended."
@@ -449,7 +450,7 @@ function App() {
           <h3>Scanning {crop}</h3>
 
           <p>
-            Analyzing the crop for possible pest infestation...
+            Checking the crop for possible pest activity...
           </p>
 
           <div className="scan-loader"></div>
@@ -570,8 +571,8 @@ function App() {
         <div className="selected-scan-card">
 
           <h3>
-           🔍 Scan Details — {selectedScan.crop}
-         </h3>
+            🔍 Scan Details — {selectedScan.crop}
+          </h3>
 
           <p>
             <strong>Crop:</strong>{" "}
@@ -586,9 +587,9 @@ function App() {
           <p>
             <strong>Risk:</strong>{" "}
             <span
-             className={`risk-${selectedScan.risk.toLowerCase()}`}
+              className={`risk-${selectedScan.risk.toLowerCase()}`}
             >
-             {selectedScan.risk}
+              {selectedScan.risk}
             </span>
           </p>
 
@@ -596,22 +597,35 @@ function App() {
 
             <div className="selected-damage-header">
               <strong>Damage:</strong>
-              <span>{selectedScan.damage}%</span>
+
+              <span
+                className={
+                  selectedScan.damage < 10
+                    ? "damage-text-low"
+                    : selectedScan.damage < 20
+                    ? "damage-text-medium"
+                    : "damage-text-high"
+                }
+              >
+                {selectedScan.damage}%
+              </span>
             </div>
 
             <div className="selected-damage-bar">
+
               <div
-                 className={`selected-damage-fill ${
+                className={`selected-damage-fill ${
                   selectedScan.damage < 10
                     ? "damage-low"
                     : selectedScan.damage < 20
                     ? "damage-medium"
                     : "damage-high"
-                 }`}
-                 style={{
-                   width: `${selectedScan.damage}%`
-                 }}
-               ></div>
+                }`}
+                style={{
+                  width: `${selectedScan.damage}%`
+                }}
+              ></div>
+
             </div>
 
           </div>
@@ -621,11 +635,23 @@ function App() {
             {selectedScan.date}
           </p>
 
+          <div
+            className={`selected-recommendation selected-recommendation-${selectedScan.risk.toLowerCase()}`}
+          >
+            <strong>💡 What to do</strong>
+
+            <p>
+              {selectedScan.recommendation ||
+                "No advice available for this scan."}
+            </p>
+
+          </div>
+
           <button
             className="close-selected-scan"
             onClick={() => setSelectedScan(null)}
           >
-           ✕ Close
+            ✕ Close
           </button>
 
         </div>
@@ -637,16 +663,24 @@ function App() {
         <h3>📋 Scan History</h3>
 
         <p className="history-count">
-          {history.length}{" "}
-          {history.length === 1 ? "scan" : "scans"}
+          {history.length} / 10 scans
         </p>
 
-        <button
+       <button
           className="clear-history"
-          onClick={() => setHistory([])}
+          onClick={() => {
+            const confirmClear = window.confirm(
+              "Are you sure you want to clear all scan history?"
+             );
+
+             if (confirmClear) {
+                setHistory([]);
+                setSelectedScan(null);
+              }
+            }}
         >
-          🗑️ Clear History
-        </button>
+            🗑️ Clear History
+          </button>
 
         {history.length === 0 ? (
 
@@ -656,11 +690,11 @@ function App() {
               📋
             </div>
 
-            <strong>No scans yet</strong>
+           <strong>No scan history</strong>
 
-            <p>
-              Scan a crop to see your scan history here.
-            </p>
+           <p>
+             Your recent crop scans will appear here.
+           </p>
 
           </div>
 
@@ -668,25 +702,46 @@ function App() {
 
           history.map((item) => (
 
-           <div
-             className={`history-item ${
-               selectedScan?.id === item.id ? "selected-history-item" : ""
-             }`}
-             key={item.id}
-             onClick={() => setSelectedScan(item)}
-          >
+            <div
+              className={`history-item ${
+                selectedScan?.id === item.id
+                  ? "selected-history-item"
+                  : ""
+              }`}
+              key={item.id}
+              onClick={() => setSelectedScan(item)}
+            >
 
               <strong>{item.crop}</strong>
 
               <p>🐞 {item.pest}</p>
 
-              <p>
-                Risk: {item.risk} | Damage: {item.damage}%
-              </p>
+              <div className="history-risk-row">
+                <span className={`history-risk risk-${item.risk.toLowerCase()}`}>
+                  Risk: {item.risk}
+                </span>
+
+                <span className="history-damage">
+                  Damage: {item.damage}%
+                </span>
+              </div>
 
               <p>
                 🕒 Scanned: {item.date}
               </p>
+
+              {item.recommendation && (
+                <p className="history-recommendation">
+                  💡 Advice:{" "}
+                  {item.recommendation.length > 80
+                    ? item.recommendation.slice(0, 80) + "..."
+                    : item.recommendation}
+                 </p> 
+              )}
+
+              <p className="history-view-details">
+                  Tap to view details →
+                </p>
 
             </div>
 
@@ -698,6 +753,6 @@ function App() {
 
     </div>
   );
- }
+}
 
- export default App;
+export default App;
