@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import Button from "./components/Button";
 import "./App.css";
@@ -6,6 +7,8 @@ function App() {
   const [crop, setCrop] = useState("🥬 Cabbage");
   const [scanning, setScanning] = useState(false);
   const [result, setResult] = useState(false);
+
+  const [notification, setNotification] = useState(null);
 
   const [history, setHistory] = useState(() => {
     const savedHistory = localStorage.getItem("agroview-history");
@@ -32,22 +35,122 @@ function App() {
   const [showAssistant, setShowAssistant] = useState(false);
   const [listening, setListening] = useState(false);
   const [recognition, setRecognition] = useState(null);
+  const [showLogin, setShowLogin] = useState(false);
 
+  /* Save history */
+  useEffect(() => {
+    localStorage.setItem(
+      "agroview-history",
+      JSON.stringify(history)
+    );
+  }, [history]);
+
+  /* Auto close app notification after 6 seconds */
+  useEffect(() => {
+    if (!notification) return;
+
+    const timer = setTimeout(() => {
+      setNotification(null);
+    }, 6000);
+
+    return () => clearTimeout(timer);
+  }, [notification]);
+
+  /* Browser notification */
+  useEffect(() => {
+    if (!notification) return;
+
+    if (
+      "Notification" in window &&
+      Notification.permission === "granted"
+    ) {
+      new Notification(notification.title, {
+        body: notification.message,
+      });
+    }
+  }, [notification]);
+
+  /* Scan process */
   useEffect(() => {
     if (!scanning) return;
 
     const timer = setTimeout(() => {
+      let scanData = {
+        pest: "",
+        risk: "",
+        damage: 0,
+        recommendation: "",
+        details: "",
+      };
+
+      if (crop === "🥬 Cabbage") {
+        scanData = {
+          pest: "Aphid",
+          risk: "Medium",
+          damage: 12,
+          recommendation:
+            "Check the affected leaves regularly and monitor for any increase in pest activity.",
+          details:
+            "Aphids can affect young leaves and new plant growth. Check the underside of leaves regularly.",
+        };
+      } else if (crop === "🌾 Rice") {
+        scanData = {
+          pest: "Stem Borer",
+          risk: "High",
+          damage: 18,
+          recommendation:
+            "Check the affected plants carefully and take suitable crop-protection measures.",
+          details:
+            "Stem borers can cause significant damage to rice plants. Regular monitoring and timely intervention are crucial.",
+        };
+      } else if (crop === "🍅 Tomato") {
+        scanData = {
+          pest: "Whitefly",
+          risk: "Medium",
+          damage: 10,
+          recommendation:
+            "Check the leaves and young shoots regularly for further pest activity.",
+          details:
+            "Whiteflies can cause yellowing of leaves and stunt plant growth. Check the undersides of leaves for their presence.",
+        };
+      } else {
+        scanData = {
+          pest: "Caterpillar",
+          risk: "Low",
+          damage: 7,
+          recommendation:
+            "Damage is currently low. Continue checking the leaves regularly.",
+          details:
+            "Caterpillars can cause damage to leaves and stems. Regular monitoring is recommended.",
+        };
+      }
+
+      /* Update scan result */
+      setPestName(scanData.pest);
+      setRiskLevel(scanData.risk);
+      setDamage(scanData.damage);
+      setRecommendation(scanData.recommendation);
+      setPestDetails(scanData.details);
+
       setScanning(false);
       setResult(true);
 
+      /* Create notification using actual scan data */
+      setNotification({
+        title: "⚠️ Pest Detected",
+        message: `🐞 ${scanData.pest} detected in ${crop}. Damage: ${scanData.damage}% | Risk: ${scanData.risk}`,
+        risk: scanData.risk,
+      });
+
+      /* Add scan to history */
       setHistory((oldHistory) => {
         const lastScan = oldHistory[0];
 
         if (
           lastScan &&
           lastScan.crop === crop &&
-          lastScan.pest === pestName &&
-          lastScan.damage === damage
+          lastScan.pest === scanData.pest &&
+          lastScan.damage === scanData.damage
         ) {
           return oldHistory;
         }
@@ -56,26 +159,26 @@ function App() {
           {
             id: Date.now(),
             crop,
-            pest: pestName,
-            risk: riskLevel,
-            damage,
-            recommendation,
+            pest: scanData.pest,
+            risk: scanData.risk,
+            damage: scanData.damage,
+            recommendation: scanData.recommendation,
             date: new Date().toLocaleString("en-IN", {
               day: "2-digit",
               month: "short",
               year: "numeric",
               hour: "2-digit",
               minute: "2-digit",
-              hour12: true
-            })
+              hour12: true,
+            }),
           },
-          ...oldHistory
+          ...oldHistory,
         ].slice(0, 10);
       });
     }, 2000);
 
     return () => clearTimeout(timer);
-  }, [scanning]);
+  }, [scanning, crop]);
 
   const speakAIResponse = (text) => {
     if (!("speechSynthesis" in window)) return;
@@ -212,7 +315,7 @@ function App() {
       setQuestion("Pest Problem");
 
       answer =
-        "🐞 Pest activity may be present. Scan your crop leaf to check for possible pest infestation.";
+        "🐛 Pest activity may be present. Scan your crop leaf to check for possible pest infestation.";
     }
 
     if (type === "health") {
@@ -244,12 +347,73 @@ function App() {
   return (
     <div className="app">
 
+      {/* Notification */}
+      {notification && (
+        <div
+          className={`app-notification notification-${notification.risk.toLowerCase()}`}
+        >
+          <div className="notification-icon">
+            🔔
+          </div>
+
+          <div className="notification-content">
+            <strong>{notification.title}</strong>
+
+            <p>{notification.message}</p>
+          </div>
+
+          <button
+            className="notification-close"
+            onClick={() => setNotification(null)}
+          >
+            ✕
+          </button>
+        </div>
+      )}
+      {showLogin && (
+        <div className="login-overlay">
+          <div className="login-card">
+
+           <button
+             className="login-close"
+             onClick={() => setShowLogin(false)}
+            >
+             ✕
+            </button>
+
+            <div className="login-icon">👤</div>
+
+            <h2>Welcome to AgroView</h2>
+            <p>Login to continue</p>
+
+            <input
+              type="text"
+              placeholder="Enter your name"
+            />
+
+           <input
+             type="email"
+             placeholder="Enter your email"
+           />
+
+           <button className="login-button">
+             Login
+            </button>
+         </div>
+      </div>
+    )}
+
       <header className="app-header">
         <h1>🌱 AgroView</h1>
 
         <div className="header-icons">
           <span>🔔</span>
-          <span>👤</span>
+          <span
+            className="profile-icon"
+            onClick={() => setShowLogin(true)}
+          >
+            👤
+        </span>
         </div>
       </header>
 
@@ -266,51 +430,16 @@ function App() {
       <Button
         text={scanning ? "🔄 Scanning..." : "📷 Scan Crop"}
         onClick={() => {
+          if (
+            "Notification" in window &&
+            Notification.permission === "default"
+          ) {
+            Notification.requestPermission();
+          }
+
           setScanning(true);
           setResult(false);
           setShowDetails(false);
-
-          if (crop === "🥬 Cabbage") {
-            setPestName("Aphid");
-            setRiskLevel("Medium");
-            setDamage(12);
-            setRecommendation(
-              "Check the affected leaves regularly and monitor for any increase in pest activity."
-            );
-            setPestDetails(
-              "Aphids can affect young leaves and new plant growth. Check the underside of leaves regularly."
-            );
-          } else if (crop === "🌾 Rice") {
-            setPestName("Stem Borer");
-            setRiskLevel("High");
-            setDamage(18);
-            setRecommendation(
-              "Check the affected plants carefully and take suitable crop-protection measures."
-            );
-            setPestDetails(
-              "Stem borers can cause significant damage to rice plants. Regular monitoring and timely intervention are crucial."
-            );
-          } else if (crop === "🍅 Tomato") {
-            setPestName("Whitefly");
-            setRiskLevel("Medium");
-            setDamage(10);
-            setRecommendation(
-              "Check the leaves and young shoots regularly for further pest activity."
-            );
-            setPestDetails(
-              "Whiteflies can cause yellowing of leaves and stunt plant growth. Check the undersides of leaves for their presence."
-            );
-          } else {
-            setPestName("Caterpillar");
-            setRiskLevel("Low");
-            setDamage(7);
-            setRecommendation(
-              "Damage is currently low. Continue checking the leaves regularly."
-            );
-            setPestDetails(
-              "Caterpillars can cause damage to leaves and stems. Regular monitoring is recommended."
-            );
-          }
         }}
       />
 
@@ -320,6 +449,7 @@ function App() {
 
         <div className="ai-content">
           <h3>Ask Agro AI</h3>
+
           <p>
             Ask questions about your crop and get farming guidance.
           </p>
@@ -362,7 +492,9 @@ function App() {
             <div className="ai-input-row">
 
               <button
-                className={`ai-mic ${listening ? "listening" : ""}`}
+                className={`ai-mic ${
+                  listening ? "listening" : ""
+                }`}
                 onClick={handleVoiceInput}
               >
                 {listening ? "🔴" : "🎤"}
@@ -410,7 +542,9 @@ function App() {
                 <div className="ai-voice-controls">
 
                   <button
-                    onClick={() => speakAIResponse(aiResponse)}
+                    onClick={() =>
+                      speakAIResponse(aiResponse)
+                    }
                   >
                     🔊 Speak
                   </button>
@@ -471,7 +605,9 @@ function App() {
 
             <p>
               <strong>Risk Level:</strong>{" "}
-              <span className={`risk-${riskLevel.toLowerCase()}`}>
+              <span
+                className={`risk-${riskLevel.toLowerCase()}`}
+              >
                 {riskLevel}
               </span>
             </p>
@@ -480,6 +616,7 @@ function App() {
 
               <div className="damage-header">
                 <strong>Crop Damage</strong>
+
                 <span>{damage}%</span>
               </div>
 
@@ -514,9 +651,13 @@ function App() {
 
           <button
             className="details-button"
-            onClick={() => setShowDetails(!showDetails)}
+            onClick={() =>
+              setShowDetails(!showDetails)
+            }
           >
-            {showDetails ? "Hide Details ↑" : "View Details →"}
+            {showDetails
+              ? "Hide Details ↑"
+              : "View Details →"}
           </button>
 
           {showDetails && (
@@ -535,31 +676,53 @@ function App() {
       <div className="crop-buttons">
 
         <button
-          className={crop === "🥬 Cabbage" ? "active-crop" : ""}
-          onClick={() => changeCrop("🥬 Cabbage")}
+          className={
+            crop === "🥬 Cabbage"
+              ? "active-crop"
+              : ""
+          }
+          onClick={() =>
+            changeCrop("🥬 Cabbage")
+          }
         >
           🥬 Cabbage
         </button>
 
         <button
-          className={crop === "🌾 Rice" ? "active-crop" : ""}
-          onClick={() => changeCrop("🌾 Rice")}
+          className={
+            crop === "🌾 Rice"
+              ? "active-crop"
+              : ""
+          }
+          onClick={() =>
+            changeCrop("🌾 Rice")
+          }
         >
           🌾 Rice
         </button>
 
         <button
-          className={crop === "🍅 Tomato" ? "active-crop" : ""}
-          onClick={() => changeCrop("🍅 Tomato")}
+          className={
+            crop === "🍅 Tomato"
+              ? "active-crop"
+              : ""
+          }
+          onClick={() =>
+            changeCrop("🍅 Tomato")
+          }
         >
           🍅 Tomato
         </button>
 
         <button
           className={
-            crop === "🥦 Cauliflower" ? "active-crop" : ""
+            crop === "🥦 Cauliflower"
+              ? "active-crop"
+              : ""
           }
-          onClick={() => changeCrop("🥦 Cauliflower")}
+          onClick={() =>
+            changeCrop("🥦 Cauliflower")
+          }
         >
           🥦 Cauliflower
         </button>
@@ -596,6 +759,7 @@ function App() {
           <div className="selected-damage">
 
             <div className="selected-damage-header">
+
               <strong>Damage:</strong>
 
               <span
@@ -609,6 +773,7 @@ function App() {
               >
                 {selectedScan.damage}%
               </span>
+
             </div>
 
             <div className="selected-damage-bar">
@@ -622,7 +787,7 @@ function App() {
                     : "damage-high"
                 }`}
                 style={{
-                  width: `${selectedScan.damage}%`
+                  width: `${selectedScan.damage}%`,
                 }}
               ></div>
 
@@ -649,7 +814,9 @@ function App() {
 
           <button
             className="close-selected-scan"
-            onClick={() => setSelectedScan(null)}
+            onClick={() =>
+              setSelectedScan(null)
+            }
           >
             ✕ Close
           </button>
@@ -666,21 +833,21 @@ function App() {
           {history.length} / 10 scans
         </p>
 
-       <button
+        <button
           className="clear-history"
           onClick={() => {
             const confirmClear = window.confirm(
               "Are you sure you want to clear all scan history?"
-             );
+            );
 
-             if (confirmClear) {
-                setHistory([]);
-                setSelectedScan(null);
-              }
-            }}
+            if (confirmClear) {
+              setHistory([]);
+              setSelectedScan(null);
+            }
+          }}
         >
-            🗑️ Clear History
-          </button>
+          🗑️ Clear History
+        </button>
 
         {history.length === 0 ? (
 
@@ -690,11 +857,11 @@ function App() {
               📋
             </div>
 
-           <strong>No scan history</strong>
+            <strong>No scan history</strong>
 
-           <p>
-             Your recent crop scans will appear here.
-           </p>
+            <p>
+              Your recent crop scans will appear here.
+            </p>
 
           </div>
 
@@ -709,21 +876,43 @@ function App() {
                   : ""
               }`}
               key={item.id}
-              onClick={() => setSelectedScan(item)}
+              onClick={() =>
+                setSelectedScan(item)
+              }
             >
 
-              <strong>{item.crop}</strong>
+              <div className="history-crop-pest">
 
-              <p>🐞 {item.pest}</p>
+                <strong>{item.crop}</strong>
+
+                <span>•</span>
+
+                <span>
+                  🐞 {item.pest}
+                </span>
+
+              </div>
 
               <div className="history-risk-row">
-                <span className={`history-risk risk-${item.risk.toLowerCase()}`}>
+
+                <span
+                  className={`history-risk risk-${item.risk.toLowerCase()}`}
+                >
                   Risk: {item.risk}
                 </span>
 
-                <span className="history-damage">
+                <span
+                  className={`history-damage ${
+                    item.damage < 10
+                      ? "damage-low"
+                      : item.damage < 20
+                      ? "damage-medium"
+                      : "damage-high"
+                  }`}
+                >
                   Damage: {item.damage}%
                 </span>
+
               </div>
 
               <p>
@@ -732,16 +921,19 @@ function App() {
 
               {item.recommendation && (
                 <p className="history-recommendation">
+
                   💡 Advice:{" "}
+
                   {item.recommendation.length > 80
                     ? item.recommendation.slice(0, 80) + "..."
                     : item.recommendation}
-                 </p> 
+
+                </p>
               )}
 
               <p className="history-view-details">
-                  Tap to view details →
-                </p>
+                Tap to view details →
+              </p>
 
             </div>
 
