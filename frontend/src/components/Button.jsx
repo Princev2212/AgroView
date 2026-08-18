@@ -1,6 +1,9 @@
 function Button({ text, onClick }) {
   return (
-    <button className="scan-button" onClick={onClick}>
+    <button
+      className="scan-button"
+      onClick={onClick}
+    >
       {text}
     </button>
   );
